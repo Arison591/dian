@@ -12,7 +12,7 @@ int main(){
         if(strcmp(a,b)==0){
         printf("2022\n");
         }else if(strcmp(a,c)==0){
-        printf("ERROR");
+        printf("ERROR\n");
         }else if(strcmp(a,d)==0){
         break;
         }
