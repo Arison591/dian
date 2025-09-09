@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include<string.h>
 
 int main() {
     FILE *file = fopen("C:\\Users\\Arison\\Desktop\\dian\\data.txt", "r");
@@ -7,10 +8,30 @@ int main() {
         return 1;
     }
     
-    char line[100];
-    while(fgets(line, sizeof(line), file)){
-        printf("%s", line);
+    char lie[100];
+    while(fgets(lie, sizeof(lie), file)){
+        
+        for(int i=0;lie[i]!='\0';i++){
+            if(lie[i]==':'){
+                lie[i]='\0';
+                char*part1=lie;
+                
+                char*part2=lie+(i+1);
+                
+                char str[100];
+                fgets(str,sizeof(str),stdin);
+                if(strcmp(str,part1)==0){
+                    printf(":%s\n",part2);
+                }else if(strcmp(str,"Quit")==0){
+                    goto here;
+
+                }else{
+                    printf("ERROR\n");
+                }
+            }
+        }
     }
+    here:
     
     fclose(file);
     return 0;
