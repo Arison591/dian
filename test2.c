@@ -19,15 +19,18 @@ int main() {
                 char*part2=lie+(i+1);
                 
                 char str[100];
-                fgets(str,sizeof(str),stdin);
-                if(strcmp(str,part1)==0){
-                    printf(":%s\n",part2);
-                }else if(strcmp(str,"Quit")==0){
+                for(int i=0;i>=0;i++){
+                    gets(str);
+                    if(strcmp(str,part1)==0){
+                    printf(":%s",part2);
+                    break;
+                    }else if(strcmp(str,"Quit")==0){
                     goto here;
-
-                }else{
+                    }else{
                     printf("ERROR\n");
+                    }
                 }
+               
             }
         }
     }
