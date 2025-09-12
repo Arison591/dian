@@ -6,16 +6,17 @@ void clearInputBuffer() {
     while ((c = getchar()) != '\n' && c != EOF);
 }
 
-int login() {
+int Enter() {//定义登录函数
     char username[100];
     int isAdmin = 0;
 
     while (1) {
         printf("Please enter the username (or 'Quit' to exit): ");
-        gets(username);
+        fgets(username, sizeof(username), stdin);
+        username[strcspn(username, "\n")] = '\0';
 
         if (strcmp(username, "Quit") == 0) {
-            return -1; // 表示退出程序
+            return -1;
         }
         else if (strcmp(username, "A") == 0) {
             printf("User login successful.\n");
@@ -32,44 +33,45 @@ int login() {
         }
     }
 
-    // 登录后操作
     char command[100];
     while (1) {
         printf("Enter OK to continue, Exit to re-login, or Quit to exit: ");
-        gets(command);
+        fgets(command, sizeof(command), stdin);
+        command[strcspn(command, "\n")] = '\0';
 
         if (strcmp(command, "OK") == 0) {
             return isAdmin;
         }
         else if (strcmp(command, "Exit") == 0) {
-            return login(); // 重新登录
+            return Enter();
         }
         else if (strcmp(command, "Quit") == 0) {
-            return -1; // 退出程序
+            return -1;
         }
         else {
-            printf("Invalid command.\n");
+            printf("Error command.\n");
         }
     }
 }
 
-void displayFloor(int map[5][4][4], int floor) {
+void displayFloor(int map[5][4][4], int floor) {//定义查询一层楼的函数
     printf("\nFloor %d:\n", floor);
     for (int row = 0; row < 4; row++) {
-        for (int col = 0; col < 4; col++) {
-            printf("%d ", map[floor-1][row][col]);
+        for (int c = 0; c < 4; c++) {
+            printf("%d ", map[floor-1][row][c]);
         }
         printf("\n");
     }
 }
 
-void displayAllReservations(int map[5][4][4]) {
+void displayAllReservations(int map[5][4][4]) {//属于管理员的函数，查询所有座位
     printf("\nAll reservations:\n");
     for (int floor = 0; floor < 5; floor++) {
         for (int row = 0; row < 4; row++) {
-            for (int col = 0; col < 4; col++) {
-                if (map[floor][row][col] != 0) {
-                    printf("Floor %d, Seat %d-%d\n", floor+1, row+1, col+1);
+            for (int c = 0; c < 4; c++) {
+                if (map[floor][row][c] != 0) {
+                    printf("Floor %d, Seat %d-%d (User %d)\n", 
+                           floor+1, row+1, c+1, map[floor][row][c]);
                 }
             }
         }
@@ -77,8 +79,9 @@ void displayAllReservations(int map[5][4][4]) {
 }
 
 int main() {
-    int map[5][4][4] = {0}; // 初始化所有座位为空
-    int isAdmin = login();
+    int map[5][4][4] = {0};
+    int userCounter = 1; // 用于分配用户ID
+    int isAdmin = Enter();
     
     if (isAdmin == -1) {
         printf("Program exited.\n");
@@ -86,40 +89,42 @@ int main() {
     }
 
     char command[100];
+    int currentUserId = isAdmin ? 0 : userCounter++; // 管理员ID为0，普通用户从1开始
     
     while (1) {
         if (isAdmin == 0) { // 普通用户
             printf("\nOptions: View floor, Reserve seat, Continue, Quit\n");
             printf("Enter command: ");
-            gets(command);
+            fgets(command, sizeof(command), stdin);
+            command[strcspn(command, "\n")] = '\0';
 
             if (strcmp(command, "View floor") == 0) {
                 int floor;
                 printf("Enter floor number (1-5): ");
                 scanf("%d", &floor);
-                clearInputBuffer();
+                clearInputBuffer();//清除\n
                 
                 if (floor >= 1 && floor <= 5) {
-                    displayFloor(map, floor);
+                    displayFloor(map, floor);//调用查询座位函数
                 } else {
                     printf("Invalid floor number.\n");
                 }
             }
             else if (strcmp(command, "Reserve seat") == 0) {
-                int floor, row, col;
+                int floor, row, c;
                 printf("Enter floor number (1-5): ");
                 scanf("%d", &floor);
                 printf("Enter seat (row column, e.g., 1 2): ");
-                scanf("%d %d", &row, &col);
-                clearInputBuffer();
+                scanf("%d %d", &row, &c);
+                clearInputBuffer();//清除
                 
-                if (floor >= 1 && floor <= 5 && row >= 1 && row <= 4 && col >= 1 && col <= 4) {
-                    if (map[floor-1][row-1][col-1] == 0) {
-                        map[floor-1][row-1][col-1] = 2; // 2表示已预约
-                        printf("Reservation successful.\n");
+                if (floor >= 1 && floor <= 5 && row >= 1 && row <= 4 && c >= 1 && c <= 4) {
+                    if (map[floor-1][row-1][c-1] == 0) {
+                        map[floor-1][row-1][c-1] = currentUserId; // 使用用户ID标记预约
+                        printf("Reservation successful. Your user ID: %d\n", currentUserId);
                         displayFloor(map, floor);
                     } else {
-                        printf("Seat already occupied.\n");
+                        printf("Seat already occupied by user %d.\n", map[floor-1][row-1][c-1]);
                     }
                 } else {
                     printf("Invalid input.\n");
@@ -129,7 +134,10 @@ int main() {
                 break;
             }
             else if (strcmp(command, "Continue") == 0) {
-                continue;
+                // 切换到另一个用户
+                isAdmin = Enter();
+                if (isAdmin == -1) break;
+                currentUserId = isAdmin ? 0 : userCounter++;
             }
             else {
                 printf("Unknown command.\n");
@@ -138,19 +146,20 @@ int main() {
         else { // 管理员
             printf("\nOptions: View floor, View reservations, Continue, Quit\n");
             printf("Enter command: ");
-            gets(command);
+            fgets(command, sizeof(command), stdin);
+            command[strcspn(command, "\n")] = '\0';
 
             if (strcmp(command, "View floor") == 0) {
                 int floor;
                 printf("Enter floor number (1-5): ");
                 scanf("%d", &floor);
-                clearInputBuffer();
+                clearInputBuffer();//清除
                 
                 if (floor >= 1 && floor <= 5) {
-                    printf("\nFloor %d (1=occupied, 0=available):\n", floor);
+                    printf("\nFloor %d (0=available, number=user ID):\n", floor);
                     for (int row = 0; row < 4; row++) {
-                        for (int col = 0; col < 4; col++) {
-                            printf("%d ", map[floor-1][row][col] != 0 ? 1 : 0);
+                        for (int c = 0; c < 4; c++) {
+                            printf("%d ", map[floor-1][row][c]);
                         }
                         printf("\n");
                     }
@@ -159,13 +168,16 @@ int main() {
                 }
             }
             else if (strcmp(command, "View reservations") == 0) {
-                displayAllReservations(map);
+                displayAllReservations(map);//调用管理员专属函数
             }
             else if (strcmp(command, "Quit") == 0) {
                 break;
             }
             else if (strcmp(command, "Continue") == 0) {
-                continue;
+                // 切换到另一个用户
+                isAdmin = Enter();
+                if (isAdmin == -1) break;
+                currentUserId = isAdmin ? 0 : userCounter++;
             }
             else {
                 printf("Unknown command.\n");
