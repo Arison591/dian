@@ -6,29 +6,46 @@ void clearInputBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
 }
-void readDate(int map[5][4][4]){//定义读取数据的函数
+void readData(int map[5][4][4]){//定义读取数据的函数
     FILE *file=fopen("Reservations.bin","rb");
     if(file==NULL){
-        printf("ERROR");
+        return;
     }
     fread(map,sizeof(int),5*4*4,file);
     fclose(file);
 }
-void writeDate(int map[5][4][4]){//储存数据的函数
+void readUser(int* userCounter){//定义读取用户id的函数
+    FILE *file=fopen("User.bin","rb");
+    if(file==NULL){
+        return;
+    }
+    fread(userCounter,sizeof(int),1,file);
+    fclose(file);
+}
+void writeUser(int userCounter){//储存用户id的函数
+    FILE *file=fopen("User.bin","wb");
+    fwrite(&userCounter,sizeof(int),1,file);
+    fclose(file);
+}
+void writeData(int map[5][4][4]){//储存数据的函数
     FILE *file=fopen("Reservations.bin","wb");
     fwrite(map,sizeof(int),5*4*4,file);
     fclose(file);
 }
-void clear(int map[5][4][4]){//clear函数
+void clear(int map[5][4][4],int userCounter){//clear函数
+    memset(map,0,sizeof(int)*5*4*4);
+    userCounter=1;
     FILE *file=fopen("Reservations.bin","wb");
-    memset(map,0,5*4*4);
+    FILE *file1=fopen("User.bin","wb");
     fwrite(map,sizeof(int),5*4*4,file);
+    fwrite(&userCounter,sizeof(int),1,file1);
     fclose(file);
+    fclose(file1);
     printf("clear successful");
 }
-int Enter() {//定义登录函数
+int Enter(int isAdmin,int* userCounter) {//定义登录函数
     char username[100];
-    int isAdmin = 0;
+    readUser(userCounter);//每次登录，系统都读取用户数据
 
     while (1) {
         printf("Please enter the username (or 'Quit' to exit): ");
@@ -36,7 +53,9 @@ int Enter() {//定义登录函数
         username[strcspn(username, "\n")] = '\0';
 
         if (strcmp(username, "Quit") == 0) {
-            return -1;
+            isAdmin=-1;
+            return isAdmin;
+            return *userCounter;
         }
         else if (strcmp(username, "A") == 0) {
             printf("User login successful.\n");
@@ -62,12 +81,15 @@ int Enter() {//定义登录函数
 
         if (strcmp(command, "OK") == 0) {
             return isAdmin;
+            return *userCounter;
         }
         else if (strcmp(command, "Exit") == 0) {
-            return Enter();
+            return Enter( isAdmin,userCounter);
         }
         else if (strcmp(command, "Quit") == 0) {
-            return -1;
+            isAdmin=-1;
+            return isAdmin;
+            return *userCounter;
         }
         else {
             printf("Error command.\n");
@@ -102,7 +124,9 @@ void displayAllReservations(int map[5][4][4]) {//属于管理员的函数，查�
 int main() {
     int map[5][4][4] = {0};
     int userCounter = 1; // 用于分配用户ID
-    int isAdmin = Enter();
+    int isAdmin = 0;
+    Enter(isAdmin,&userCounter);
+    readData(map);//读取座位号
     
     if (isAdmin == -1) {
         printf("Program exited.\n");
@@ -110,12 +134,14 @@ int main() {
     }
 
     char command[100];
-    int currentUserId = isAdmin ? 0 : userCounter++; // 管理员ID为0，普通用户从1开始
     
+    readUser(&userCounter);//读取用户id
+    int currentUserId = isAdmin ? 0 : userCounter++; // 管理员ID为0，普通用户从1开始
+    writeUser(userCounter);//读入用户id
     while (1) {
-        readDate(map);
-        if (isAdmin == 0) { // 普通用户
-            printf("\nOptions: View floor, Reserve seat, Continue, Quit\n");
+        
+        if (isAdmin == 0) { // 用户
+            printf("\nOptions: View floor, Reserve seat, Re-login, Quit\n");
             printf("Enter command: ");
             fgets(command, sizeof(command), stdin);
             command[strcspn(command, "\n")] = '\0';
@@ -126,7 +152,7 @@ int main() {
                 clearInputBuffer();//清除\n
                 
                 if (floor >= 1 && floor <= 5) {
-                    readDate(map);//读取座位号
+                    
                     displayFloor(map, floor);//调用查询座位函数
                 } else {
                     printf("Invalid floor number.\n");
@@ -142,7 +168,7 @@ int main() {
                 if (floor >= 1 && floor <= 5 && row >= 1 && row <= 4 && c >= 1 && c <= 4) {
                     if (map[floor-1][row-1][c-1] == 0) {
                         map[floor-1][row-1][c-1] = currentUserId; // 使用用户ID标记预约
-                        writeDate(map);//读入座位号
+                        writeData(map);//读入座位号
                         printf("Reservation successful. Your user ID: %d\n", currentUserId);
                         displayFloor(map, floor);
                     } else {
@@ -154,9 +180,9 @@ int main() {
             }
             else if(strcmp(command, "Quit") == 0) {
                 break;
-            }else if(strcmp(command, "Continue") == 0) {
+            }else if(strcmp(command, "Re-login") == 0) {
                 // 切换到另一个用户
-                isAdmin = Enter();
+                isAdmin = Enter(isAdmin,&userCounter);
                 if (isAdmin == -1) break;
                 currentUserId = isAdmin ? 0 : userCounter++;
             }
@@ -165,13 +191,13 @@ int main() {
             }
         }
         else { // 管理员
-            printf("\nOptions: View floor, View reservations, Clear,Continue, Quit\n");
+            printf("\nOptions: View floor, View reservations, Clear,Re-login, Quit\n");
             printf("Enter command: ");
             fgets(command, sizeof(command), stdin);
             command[strcspn(command, "\n")] = '\0';
 
             if (strcmp(command, "View floor") == 0) {//查询一个楼的座位
-                readDate(map);
+                readData(map);
                 int floor;
                 printf("Enter floor number (1-5): ");
                 scanf("%d", &floor);
@@ -189,17 +215,16 @@ int main() {
                     printf("Invalid floor number.\n");
                 }
             }else if(strcmp(command, "View reservations") == 0) {
-                readDate(map);
                 displayAllReservations(map);//调用管理员专属函数
             }else if(strcmp(command, "Quit") == 0) {
                 break;
-            }else if(strcmp(command, "Continue") == 0) {
+            }else if(strcmp(command, "Re-login") == 0) {
                 // 切换到另一个用户
-                isAdmin = Enter();
+                isAdmin = Enter(isAdmin,&userCounter);
                 if (isAdmin == -1) break;
                 currentUserId = isAdmin ? 0 : userCounter++;
             }else if(strcmp(command, "Clear") == 0){
-                clear(map);//清除数据
+                clear(map,userCounter);//清除数据
             }
             else {
                 printf("Unknown command.\n");
