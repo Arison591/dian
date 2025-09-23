@@ -32,13 +32,13 @@ void writeData(int map[5][4][4]){//储存数据的函数
     fwrite(map,sizeof(int),5*4*4,file);
     fclose(file);
 }
-void clear(int map[5][4][4],int userCounter){//clear函数
+void clear(int map[5][4][4],int *userCounter){//clear函数
     memset(map,0,sizeof(int)*5*4*4);
-    userCounter=1;
+    *userCounter=1;
     FILE *file=fopen("Reservations.bin","wb");
     FILE *file1=fopen("User.bin","wb");
     fwrite(map,sizeof(int),5*4*4,file);
-    fwrite(&userCounter,sizeof(int),1,file1);
+    fwrite(userCounter,sizeof(int),1,file1);
     fclose(file);
     fclose(file1);
     printf("clear successful");
@@ -55,7 +55,7 @@ int Enter(int isAdmin,int* userCounter) {//定义登录函数
         if (strcmp(username, "Quit") == 0) {
             isAdmin=-1;
             return isAdmin;
-            return *userCounter;
+            
         }
         else if (strcmp(username, "A") == 0) {
             printf("User login successful.\n");
@@ -81,7 +81,7 @@ int Enter(int isAdmin,int* userCounter) {//定义登录函数
 
         if (strcmp(command, "OK") == 0) {
             return isAdmin;
-            return *userCounter;
+            
         }
         else if (strcmp(command, "Exit") == 0) {
             return Enter( isAdmin,userCounter);
@@ -89,7 +89,7 @@ int Enter(int isAdmin,int* userCounter) {//定义登录函数
         else if (strcmp(command, "Quit") == 0) {
             isAdmin=-1;
             return isAdmin;
-            return *userCounter;
+            
         }
         else {
             printf("Error command.\n");
@@ -224,7 +224,7 @@ int main() {
                 if (isAdmin == -1) break;
                 currentUserId = isAdmin ? 0 : userCounter++;
             }else if(strcmp(command, "Clear") == 0){
-                clear(map,userCounter);//清除数据
+                clear(map,&userCounter);//清除数据
             }
             else {
                 printf("Unknown command.\n");

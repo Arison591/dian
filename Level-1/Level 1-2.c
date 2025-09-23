@@ -1,168 +1,190 @@
 #include <stdio.h>
 #include <string.h>
-void clearInputBuffer()
-{
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF)
-        ;
-}
-int Enter(int isPrime)
-{
-    char str[100];
-    
 
-    for (int i = 0; i >= 0; i++)
-    {
-        printf("Please enter the user:");
-        gets(str);
-        if (strcmp(str, "A") == 0)
-        {
-            printf("Login successful.\n");
-            printf("Enter OK, Exit, or Quit.\n");
-            char str1[100];
-            gets(str1);
-            if (strcmp(str1, "Exit") == 0)
-            {
-                continue;
-            }
-            else if (strcmp(str1, "Quit") == 0)
-            {
-                goto there;
-            }
-            else if (strcmp(str1, "OK") == 0)
-            {
-                goto there;
-            }
+void clearInputBuffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
+int Enter() {//定义登录函数
+    char username[100];
+    int isAdmin = 0;
+
+    while (1) {
+        printf("Please enter the username (or 'Quit' to exit): ");
+        fgets(username, sizeof(username), stdin);
+        username[strcspn(username, "\n")] = '\0';
+
+        if (strcmp(username, "Quit") == 0) {
+            return -1;
         }
-        else if (strcmp(str, "Quit") == 0)
-        {
+        else if (strcmp(username, "A") == 0) {
+            printf("User login successful.\n");
+            isAdmin = 0;
             break;
         }
-        else if (strcmp(str, "A") != 0 && strcmp(str, "admin") != 0)
-        {
-            printf("Error,try again.\n");
-            continue;
+        else if (strcmp(username, "admin") == 0) {
+            printf("Admin login successful.\n");
+            isAdmin = 1;
+            break;
         }
-        else if (strcmp(str, "admin") == 0)
-        {
-            printf("Login successful.\n");
-            printf("Enter OK, Exit, or Quit.\n");
-            char str1[100];
-            gets(str1);
-            if (strcmp(str1, "Exit") == 0)
-            {
-                continue;
-            }
-            else if (strcmp(str1, "Quit") == 0)
-            {
-                goto there;
-            }
-            else if (strcmp(str1, "OK") == 0)
-            { // 输入OK表示登录完毕
-                goto there;
-                isPrime = 1;
-            }
+        else {
+            printf("Error, try again.\n");
         }
     }
-there:
-    return isPrime;
+
+    char command[100];
+    while (1) {
+        printf("Enter OK to continue, Exit to re-login, or Quit to exit: ");
+        fgets(command, sizeof(command), stdin);
+        command[strcspn(command, "\n")] = '\0';
+
+        if (strcmp(command, "OK") == 0) {
+            return isAdmin;
+        }
+        else if (strcmp(command, "Exit") == 0) {
+            return Enter();
+        }
+        else if (strcmp(command, "Quit") == 0) {
+            return -1;
+        }
+        else {
+            printf("Error command.\n");
+        }
+    }
 }
 
-int main()
-{
-    int isPrime = 0;
-    Enter(isPrime);
-    int a; // a用于表示楼层
-    int b; // b用于表示列
-    int c; // c用于表示行
-    int map[5][4][4] = {0};
-    char str[100];
-    char str1[100];
-
-// for( a=0;a<5;a++){
-//     printf("\n-%d-\n",a+1);
-//     for( b=0;b<4;b++){
-//         for( c=0;c<4;c++){
-//             printf("%d",map[a][b][c]);
-//         }
-//         printf("\n");
-//     }
-// }
-here:
-    printf("Friday Floor ");//用户查询座位
-    scanf("%d", &a);
-    printf("\n-%d-\n", a);
-    for (b = 0; b < 4; b++)
-    {
-        for (c = 0; c < 4; c++)
-        {
-            printf("%d", map[a - 1][b][c]);
+void displayFloor(int map[5][4][4], int floor) {//定义查询一层楼的函数
+    printf("\nFloor %d:\n", floor);
+    for (int row = 0; row < 4; row++) {
+        for (int c = 0; c < 4; c++) {
+            printf("%d ", map[floor-1][row][c]);
         }
         printf("\n");
     }
-    if (isPrime == 0)
-    {
-        printf("Reserve Monday Floor ");
-        scanf("%d", &a);
-        printf("Seat ");
-        scanf("%d %d", &b, &c);
-        map[a - 1][b - 1][c - 1] = 2;
-        printf("Friday Floor ");
-        scanf("%d", &a);
-        clearInputBuffer(); // 清理缓冲区
-        printf("\n-%d-\n", a);
-        for (b = 0; b < 4; b++)
-        {
-            for (c = 0; c < 4; c++)
-            {
-                printf("%d", map[a - 1][b][c]);
-            }
-            printf("\n");
-        }
-    }
-    if(isPrime==1){
-        printf("Friday Floor ");
-        scanf("%d", &a);
-        clearInputBuffer(); // 清理缓冲区
-        printf("\n-%d-\n", a);//管理员查询每一层的座位
-        for (b = 0; b < 4; b++)
-        {
-            for (c = 0; c < 4; c++)
-            {
-                if(map[a-1][b][c]==0){
-                    printf("%d",map[a-1][b][c]);
-                }else if(map[a-1][b][c]==2){
-                    printf("%d",1);
-                }
-                
-            }
-            printf("\n");
-        }
-        gets(str);//查询所有的预约座位
-        if(strcmp(str,"Reservation")==0){
-            for( a=0;a<5;a++){
-                for( b=0;b<4;b++){
-                    for( c=0;c<4;c++){
-                        if(map[a][b][c]!=0){
-                            printf("Friday Floor %d Seat %d %d\n",a+1,b+1,c+1);
-                            
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // 继续预约系统
-    printf("Enter 'Continue' to make another reservation: ");
-    gets(str1);
-    if (strcmp(str1, "Continue") == 0)
-    {
-        goto here;
-    }
-    return 0;
 }
 
-// 建立输出每层楼的预约情况的函数?
-// 记住，所有数组都是从零开始
-// 还要建立二次预约系统
+void displayAllReservations(int map[5][4][4]) {//属于管理员的函数，查询所有座位
+    printf("\nAll reservations:\n");
+    for (int floor = 0; floor < 5; floor++) {
+        for (int row = 0; row < 4; row++) {
+            for (int c = 0; c < 4; c++) {
+                if (map[floor][row][c] != 0) {
+                    printf("Floor %d, Seat %d-%d (User %d)\n", 
+                           floor+1, row+1, c+1, map[floor][row][c]);
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    int map[5][4][4] = {0};
+    int userCounter = 1; // 用于分配用户ID
+    int isAdmin = Enter();
+    
+    if (isAdmin == -1) {
+        printf("Program exited.\n");
+        return 0;
+    }
+
+    char command[100];
+    int currentUserId = isAdmin ? 0 : userCounter++; // 管理员ID为0，普通用户从1开始
+    
+    while (1) {
+        if (isAdmin == 0) { // 普通用户
+            printf("\nOptions: View floor, Reserve seat, Continue, Quit\n");
+            printf("Enter command: ");
+            fgets(command, sizeof(command), stdin);
+            command[strcspn(command, "\n")] = '\0';
+
+            if (strcmp(command, "View floor") == 0) {
+                int floor;
+                printf("Enter floor number (1-5): ");
+                scanf("%d", &floor);
+                clearInputBuffer();//清除\n
+                
+                if (floor >= 1 && floor <= 5) {
+                    displayFloor(map, floor);//调用查询座位函数
+                } else {
+                    printf("Invalid floor number.\n");
+                }
+            }
+            else if (strcmp(command, "Reserve seat") == 0) {
+                int floor, row, c;
+                printf("Enter floor number (1-5): ");
+                scanf("%d", &floor);
+                printf("Enter seat (row column, e.g., 1 2): ");
+                scanf("%d %d", &row, &c);
+                clearInputBuffer();//清除
+                
+                if (floor >= 1 && floor <= 5 && row >= 1 && row <= 4 && c >= 1 && c <= 4) {
+                    if (map[floor-1][row-1][c-1] == 0) {
+                        map[floor-1][row-1][c-1] = currentUserId; // 使用用户ID标记预约
+                        printf("Reservation successful. Your user ID: %d\n", currentUserId);
+                        displayFloor(map, floor);
+                    } else {
+                        printf("Seat already occupied by user %d.\n", map[floor-1][row-1][c-1]);
+                    }
+                } else {
+                    printf("Invalid input.\n");
+                }
+            }
+            else if (strcmp(command, "Quit") == 0) {
+                break;
+            }
+            else if (strcmp(command, "Continue") == 0) {
+                // 切换到另一个用户
+                isAdmin = Enter();
+                if (isAdmin == -1) break;
+                currentUserId = isAdmin ? 0 : userCounter++;
+            }
+            else {
+                printf("Unknown command.\n");
+            }
+        }
+        else { // 管理员
+            printf("\nOptions: View floor, View reservations, Continue, Quit\n");
+            printf("Enter command: ");
+            fgets(command, sizeof(command), stdin);
+            command[strcspn(command, "\n")] = '\0';
+
+            if (strcmp(command, "View floor") == 0) {
+                int floor;
+                printf("Enter floor number (1-5): ");
+                scanf("%d", &floor);
+                clearInputBuffer();//清除
+                
+                if (floor >= 1 && floor <= 5) {
+                    printf("\nFloor %d (0=available, number=user ID):\n", floor);
+                    for (int row = 0; row < 4; row++) {
+                        for (int c = 0; c < 4; c++) {
+                            printf("%d ", map[floor-1][row][c]);
+                        }
+                        printf("\n");
+                    }
+                } else {
+                    printf("Invalid floor number.\n");
+                }
+            }
+            else if (strcmp(command, "View reservations") == 0) {
+                displayAllReservations(map);//调用管理员专属函数
+            }
+            else if (strcmp(command, "Quit") == 0) {
+                break;
+            }
+            else if (strcmp(command, "Continue") == 0) {
+                // 切换到另一个用户
+                isAdmin = Enter();
+                if (isAdmin == -1) break;
+                currentUserId = isAdmin ? 0 : userCounter++;
+            }
+            else {
+                printf("Unknown command.\n");
+            }
+        }
+    }
+
+    printf("Thank you for using the reservation system.\n");
+    return 0;
+}
