@@ -2,7 +2,7 @@
 #include<string.h>
 
 int main() {//读文件
-    FILE *file = fopen("C:\\Users\\Arison\\Desktop\\dian\\data.txt", "r");
+    FILE *file = fopen("data.txt", "r");
     if(file == NULL) {//如果是空文件，及时返回
         printf("ERROR\n");
         return 1;
