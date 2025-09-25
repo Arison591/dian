@@ -2,7 +2,10 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
-
+//增加临时签离的功能
+//分时段预约
+//管理员强制清除该座位所有预约
+//
 // 时间结构体（小时级，支持0-23）
 typedef struct {
     int start_hour;  // 开始小时
