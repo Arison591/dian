@@ -136,7 +136,8 @@ int getNextUserId() {
         fclose(file);
     }
     
-    int newUserId = userCounter++;
+    int newUserId = userCounter;
+    userCounter++;  // 递增为下一个用户准备
     
     file = fopen("User.bin", "wb");
     if (file) {
@@ -339,6 +340,10 @@ int main() {
     printf("Process ID: %lu\n", GetCurrentProcessId());
     printf("Startup Time: %lu\n", GetTickCount());
     
+    // 修复：在程序开始时读取最新的用户计数器
+    readUser(&userCounter);
+    printf("Current user counter: %d\n", userCounter); // 调试信息
+    
     // 检查是否通过多开启动器启动
     if (__argc > 1) {
         if (strcmp(__argv[1], "multi") == 0) {
@@ -361,7 +366,7 @@ int main() {
     // 读取数据
     safeReadData(map);
     
-    // 分配用户ID
+    // 分配用户ID - 修复逻辑
     int currentUserId;
     if (isAdmin == 1) {
         currentUserId = 0;  // 管理员ID为0
@@ -373,7 +378,7 @@ int main() {
             return 1;
         }
         printf("Current identity: Regular User (ID: %d)\n", currentUserId);
-        writeUser(userCounter);  // 更新用户计数器
+        // 注意：移除了 writeUser(userCounter)，因为getNextUserId已经处理了写入
     }
 
     char command[100];
@@ -429,7 +434,7 @@ int main() {
                 if (isAdmin == 0) {
                     currentUserId = getNextUserId();
                     if (currentUserId != -1) {
-                        writeUser(userCounter);
+                        // 不需要再次调用writeUser，getNextUserId已经处理了
                     }
                 } else {
                     currentUserId = 0;
@@ -475,7 +480,7 @@ int main() {
                 if (isAdmin == 0) {
                     currentUserId = getNextUserId();
                     if (currentUserId != -1) {
-                        writeUser(userCounter);
+                        // 不需要再次调用writeUser
                     }
                 } else {
                     currentUserId = 0;
