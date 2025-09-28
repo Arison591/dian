@@ -2,8 +2,8 @@
 #include<string.h>
 int main(){
     char a[100];
-    char b[]="dian";
-    char c[]="langya";
+    char b[]="Dian";
+    char c[]="Langya";
     char d[]="Quit";
     
     for(int i=0;i>=0;i++){
