@@ -10,7 +10,7 @@ int main(){
         printf("Please erter:");
         scanf("%s",a);
         if(strcmp(a,b)==0){
-        printf("2022\n");
+        printf("2002\n");
         }else if(strcmp(a,b)!=0&&strcmp(a,d)!=0){
         printf("ERROR\n");
         }else if(strcmp(a,d)==0){
