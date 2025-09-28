@@ -3,7 +3,7 @@
 int main(){
     char a[100];
     char b[]="Dian";
-    char c[]="Langya";
+    
     char d[]="Quit";
     
     for(int i=0;i>=0;i++){
@@ -11,7 +11,7 @@ int main(){
         scanf("%s",a);
         if(strcmp(a,b)==0){
         printf("2022\n");
-        }else if(strcmp(a,c)==0){
+        }else if(strcmp(a,b)!=0&&strcmp(a,d)!=0){
         printf("ERROR\n");
         }else if(strcmp(a,d)==0){
         break;
